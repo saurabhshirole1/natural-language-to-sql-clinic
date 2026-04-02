@@ -1,0 +1,18 @@
+# Core - Vanna 2.0 with Gemini and SQLite support
+vanna[gemini,sqlite]>=2.0.0
+
+# API framework
+fastapi
+uvicorn[standard]
+
+# Visualization
+plotly
+
+# Data handling
+pandas
+
+# Environment variable management
+python-dotenv
+
+# For Gemini LLM
+google-genai
