@@ -5,7 +5,8 @@ Ask questions in plain English and get results from a clinic database — no SQL
 
 ## LLM Provider
 
-This project uses **Google Gemini** (`gemini-2.5-flash`) via `GeminiLlmService`.  
+<!-- This project uses **Google Gemini** (`gemini-2.5-flash`) via `GeminiLlmService`. -->  
+This Project uses **Grok API**(`llama-3.3-70b-versatile`)
 Get a free API key at: https://aistudio.google.com/apikey
 
 ---
