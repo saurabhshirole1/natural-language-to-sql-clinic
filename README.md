@@ -54,10 +54,10 @@ pip install -r requirements.txt
 Create a `.env` file in the project root:
 
 ```
-GOOGLE_API_KEY=your-gemini-api-key-here
+GROQ_API_KEY=your-grok-api-key-here
 ```
 
-You can get a free key at https://aistudio.google.com/apikey.
+You can get a free key at https://console.groq.com/keys.
 
 ### 5. Create the database
 
