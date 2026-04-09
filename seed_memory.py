@@ -1,25 +1,7 @@
-"""
-seed_memory.py
-
-Pre-seeds the VannaAgent memory with known-good question -> SQL pairs.
-
-Run order:
-    1. python setup_database.py
-    2. python seed_memory.py   (optional — vanna_setup.py seeds automatically)
-    3. uvicorn main:app --port 8000
-
-Note: vanna_setup.py already loads SEED_EXAMPLES on startup.
-      This script adds EXTRA pairs that are not in SEED_EXAMPLES,
-      giving the agent a richer memory for edge cases.
-"""
 
 import sys
 from vanna_setup import get_agent, SQLValidator
 
-# ---------------------------------------------------------------------------
-# Extra Q&A pairs — these EXTEND the base SEED_EXAMPLES in vanna_setup.py
-# Focus: edge cases, alternate phrasings, and questions not in base seeds
-# ---------------------------------------------------------------------------
 
 QA_PAIRS = [
 
@@ -485,9 +467,7 @@ QA_PAIRS = [
 ]
 
 
-# ---------------------------------------------------------------------------
 # Seed function
-# ---------------------------------------------------------------------------
 
 def seed_memory() -> None:
     print("Seeding agent memory with Q&A pairs...")
@@ -529,9 +509,7 @@ def seed_memory() -> None:
         sys.exit(1)
 
 
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     seed_memory()

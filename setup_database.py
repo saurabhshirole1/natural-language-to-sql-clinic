@@ -1,31 +1,12 @@
-#!/usr/bin/env python3
-"""
-setup_database.py
-
-Creates the clinic.db SQLite database with schema and realistic dummy data.
-
-Usage:
-    python setup_database.py
-
-Database contents (default):
-    - 15 doctors  (3 per specialization)
-    - 200 patients
-    - 500 appointments
-    - ~350 treatments (for completed appointments only)
-    - 300 invoices
-"""
-
 import os
 import random
 import sqlite3
 from datetime import datetime, timedelta
 from typing import List, Tuple
 
-# ---------------------------------------------------------------------------
 # Configuration
-# ---------------------------------------------------------------------------
 DATABASE_PATH   = "clinic.db"
-RANDOM_SEED     = 42          # Fixed seed for reproducible data
+RANDOM_SEED     = 42         
 
 NUM_DOCTORS      = 15
 NUM_PATIENTS     = 200
@@ -33,9 +14,7 @@ NUM_APPOINTMENTS = 500
 NUM_TREATMENTS   = 350
 NUM_INVOICES     = 300
 
-# ---------------------------------------------------------------------------
 # Data pools
-# ---------------------------------------------------------------------------
 FIRST_NAMES_MALE = [
     "James", "John", "Robert", "Michael", "William", "David", "Richard",
     "Joseph", "Thomas", "Charles", "Christopher", "Daniel", "Matthew",
@@ -100,9 +79,7 @@ APPOINTMENT_NOTES = [
 ]
 
 
-# ---------------------------------------------------------------------------
 # Helpers
-# ---------------------------------------------------------------------------
 
 def generate_phone() -> str:
     """Return a realistic US phone number string."""
@@ -136,9 +113,7 @@ def random_date(start: datetime, end: datetime) -> datetime:
     return start + timedelta(days=random.randint(0, delta.days))
 
 
-# ---------------------------------------------------------------------------
 # Schema creation
-# ---------------------------------------------------------------------------
 
 def create_schema(cursor: sqlite3.Cursor) -> None:
     """Drop and recreate all tables."""
@@ -219,9 +194,7 @@ def create_schema(cursor: sqlite3.Cursor) -> None:
     print("  Schema created successfully")
 
 
-# ---------------------------------------------------------------------------
 # Data insertion
-# ---------------------------------------------------------------------------
 
 def insert_doctors(cursor: sqlite3.Cursor) -> List[int]:
     """
@@ -445,11 +418,7 @@ def insert_invoices(cursor: sqlite3.Cursor, patient_ids: List[int]) -> int:
     print(f"  Inserted {invoice_count} invoices")
     return invoice_count
 
-
-# ---------------------------------------------------------------------------
 # Summary report
-# ---------------------------------------------------------------------------
-
 def print_summary(cursor: sqlite3.Cursor) -> None:
     """Print a human-readable summary of every table."""
     print("\n" + "=" * 55)
@@ -520,10 +489,7 @@ def print_summary(cursor: sqlite3.Cursor) -> None:
 
     print("=" * 55)
 
-
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
 
 def main() -> None:
     """Create the database from scratch."""

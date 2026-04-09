@@ -5,6 +5,8 @@
 | Database | clinic.db - 200 patients, 15 doctors, 500 appointments, 350 treatments, 300 invoices |
 | LLM | GROQ API Key |
 | Date | 2026-04-05 13:44 |
+| LLM | Google Gemini 2.0 Flash |
+| Date | 2026-04-09 09:42 |
 | Score | **18/20 (90.0%)** |
 
 ---

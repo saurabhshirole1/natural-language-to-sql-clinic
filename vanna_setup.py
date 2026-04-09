@@ -1,10 +1,3 @@
-"""
-vanna_setup.py
-
-Vanna 2.0 Agent — NL2SQL for Clinic Management System
-Uses Groq API (not Google Gemini).
-"""
-
 import os
 import re
 import math
@@ -18,9 +11,7 @@ load_dotenv()
 
 DATABASE_PATH = os.getenv("DB_PATH", "clinic.db")
 
-# ---------------------------------------------------------------------------
 # Database schema
-# ---------------------------------------------------------------------------
 SCHEMA_CONTEXT = """
 Tables in the clinic SQLite database:
 
@@ -59,9 +50,7 @@ Fields NOT in the database (answer "not available" for these):
   - cause of death, mortality, deceased status
 """
 
-# ---------------------------------------------------------------------------
 # Out-of-scope detection
-# ---------------------------------------------------------------------------
 
 OUT_OF_SCOPE_PATTERNS = [
     r"\b(dead|died|death|deceased|mortality|killed|fatality|fatalities)\b",
@@ -119,12 +108,9 @@ IN_SCOPE_KEYWORDS = [
     "list", "show", "compare", "find", "which", "what",
 ]
 
-
-# ---------------------------------------------------------------------------
 # Comprehensive seed examples
-# ---------------------------------------------------------------------------
 SEED_EXAMPLES = [
-    # ── Patients ──────────────────────────────────────────────────────────
+    # ── Patients 
     {
         "question": "How many patients do we have?",
         "sql": "SELECT COUNT(*) AS total_patients FROM patients"
@@ -185,7 +171,7 @@ SEED_EXAMPLES = [
         )
     },
 
-    # ── Doctors ───────────────────────────────────────────────────────────
+    # ── Doctors 
     {
         "question": "How many doctors do we have?",
         "sql": "SELECT COUNT(*) AS total_doctors FROM doctors"
@@ -231,7 +217,7 @@ SEED_EXAMPLES = [
         )
     },
 
-    # ── Appointments ──────────────────────────────────────────────────────
+    # ── Appointments 
     {
         "question": "How many appointments do we have?",
         "sql": "SELECT COUNT(*) AS total_appointments FROM appointments"
@@ -332,7 +318,7 @@ SEED_EXAMPLES = [
         )
     },
 
-    # ── Treatments ────────────────────────────────────────────────────────
+    # ── Treatments 
     {
         "question": "Average treatment cost by specialization",
         "sql": (
@@ -375,7 +361,7 @@ SEED_EXAMPLES = [
         "sql": "SELECT ROUND(SUM(cost), 2) AS total_treatment_cost FROM treatments"
     },
 
-    # ── Financial ─────────────────────────────────────────────────────────
+    # ── Financial 
     {
         "question": "What is the total revenue?",
         "sql": "SELECT ROUND(SUM(total_amount), 2) AS total_revenue FROM invoices"
@@ -462,10 +448,7 @@ SEED_EXAMPLES = [
     },
 ]
 
-
-# ---------------------------------------------------------------------------
 # SQL Validator
-# ---------------------------------------------------------------------------
 class SQLValidator:
     """Ensures only safe, read-only SELECT queries reach the database."""
 
@@ -488,10 +471,7 @@ class SQLValidator:
                 return False, f"Blocked keyword detected: {pattern}"
         return True, ""
 
-
-# ---------------------------------------------------------------------------
 # Improved Memory Store
-# ---------------------------------------------------------------------------
 class SimpleMemoryStore:
     """In-memory store with cosine similarity scoring."""
 
@@ -560,9 +540,7 @@ class SimpleMemoryStore:
         return len(self.qa_pairs)
 
 
-# ---------------------------------------------------------------------------
-# VannaAgent - FIXED FOR GROQ
-# ---------------------------------------------------------------------------
+# VannaAgent 
 class VannaAgent:
     """NL2SQL agent backed by Groq and improved memory."""
 
@@ -602,9 +580,7 @@ STRICT RULES:
         for ex in SEED_EXAMPLES:
             self.memory.add(ex["question"], ex["sql"])
 
-    # ------------------------------------------------------------------ #
-    # LLM setup - FIXED FOR GROQ                                          #
-    # ------------------------------------------------------------------ #
+    # LLM setup                                        
     def _init_llm(self) -> None:
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
@@ -619,9 +595,7 @@ STRICT RULES:
         except Exception as exc:
             print(f"Warning: Groq init failed: {exc}")
 
-    # ------------------------------------------------------------------ #
-    # Prompt builder                                                        #
-    # ------------------------------------------------------------------ #
+    # Prompt builder                                                        
     def _build_prompt(self, question: str) -> str:
         similar = self.memory.search(question, limit=4)
         parts = [
@@ -641,16 +615,13 @@ STRICT RULES:
         parts.append("Output ONLY the SQL query, nothing else.")
         return "\n".join(parts)
 
-    # ------------------------------------------------------------------ #
-    # LLM call - FIXED FOR GROQ                                           #
-    # ------------------------------------------------------------------ #
+    # LLM call                                          
     def _call_llm(self, question: str) -> Optional[str]:
         if not self._client:
             return None
         try:
-            # Use current Groq model (llama-3.3-70b-versatile)
             response = self._client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama-3.3-70b-versatile",  # Use current Groq model
                 messages=[
                     {"role": "system", "content": self._SYSTEM},
                     {"role": "user", "content": self._build_prompt(question)}
@@ -686,9 +657,7 @@ STRICT RULES:
             print(f"LLM error: {exc}")
             return None
 
-    # ------------------------------------------------------------------ #
     # SQL generation with fallback                                         #
-    # ------------------------------------------------------------------ #
     def generate_sql(self, question: str) -> Optional[str]:
         """Generate SQL: LLM first, then memory fallback."""
         # 1. Try LLM
@@ -712,9 +681,7 @@ STRICT RULES:
 
         return None
 
-    # ------------------------------------------------------------------ #
     # SQL execution                                                         #
-    # ------------------------------------------------------------------ #
     def execute_sql(self, sql: str) -> Dict[str, Any]:
         is_valid, error = SQLValidator.validate(sql)
         if not is_valid:
@@ -871,19 +838,14 @@ STRICT RULES:
 
         return result
 
-    # ------------------------------------------------------------------ #
-    # Public helpers                                                        #
-    # ------------------------------------------------------------------ #
+    # Public helpers                                                        
     def add_training_data(self, question: str, sql: str) -> None:
         self.memory.add(question, sql)
 
     def get_memory_count(self) -> int:
         return self.memory.count()
 
-
-# ---------------------------------------------------------------------------
 # Singleton
-# ---------------------------------------------------------------------------
 _agent_instance: Optional[VannaAgent] = None
 
 
@@ -896,10 +858,7 @@ def get_agent() -> VannaAgent:
 
 agent = get_agent()
 
-
-# ---------------------------------------------------------------------------
 # Smoke test
-# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     print("\n-- VannaAgent smoke test --")
     a = get_agent()

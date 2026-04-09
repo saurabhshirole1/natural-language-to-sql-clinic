@@ -1,15 +1,3 @@
-"""
-test_questions.py
-
-Tests all 20 questions against the NL2SQL Clinic Chatbot API.
-Target score: 17-18/20 (realistic production score).
-
-Checks:
-  1. SQL keyword validation (must_contain / must_not_contain)
-  2. Row count validation (min/max/exact)
-  3. Single-row aggregation validation
-  4. Saves results to test_results.json and RESULTS.md
-"""
 
 import json
 import requests
@@ -18,22 +6,11 @@ from typing import Optional
 
 BASE_URL = "http://127.0.0.1:8000"
 
-# ---------------------------------------------------------------------------
-# Test Cases
-# ---------------------------------------------------------------------------
-# Fields per test case:
-#   question         : natural language question to send
-#   must_contain     : SQL keywords that MUST appear (case-insensitive)
-#   must_not_contain : SQL keywords that must NOT appear (wrong/recycled query)
-#   min_rows         : minimum row count expected (-1 = skip check)
-#   max_rows         : maximum row count expected (None = skip check)
-#   expect_single    : True = expect exactly 1 row (COUNT/SUM aggregation)
-#   exact_rows       : exact row count expected (None = skip check)
 
 TEST_CASES = [
-    # ------------------------------------------------------------------ #
-    # Q1 — Total patient count                                            #
-    # ------------------------------------------------------------------ #
+  
+    # Q1 — Total patient count                                            
+
     {
         "id": 1,
         "question": "How many patients do we have?",
@@ -43,9 +20,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q2 — List all doctors (exact row check: 15 doctors in DB)          #
-    # ------------------------------------------------------------------ #
+    # Q2 — List all doctors (exact row check: 15 doctors in DB)          
     {
         "id": 2,
         "question": "List all doctors and their specializations",
@@ -55,9 +30,8 @@ TEST_CASES = [
         "exact_rows": 15,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q3 — Last month appointments (strict date syntax check)             #
-    # ------------------------------------------------------------------ #
+
+    # Q3 — Last month appointments (strict date syntax check)             
     {
         "id": 3,
         "question": "Show me appointments for last month",
@@ -65,9 +39,7 @@ TEST_CASES = [
         "min_rows": 0,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q4 — Doctor with most appointments                                  #
-    # ------------------------------------------------------------------ #
+    # Q4 — Doctor with most appointments                                  
     {
         "id": 4,
         "question": "Which doctor has the most appointments?",
@@ -77,10 +49,8 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q5 — Total revenue (single SUM)                                     #
-    # Note: removed "group by" from must_not_contain — too fragile        #
-    # ------------------------------------------------------------------ #
+    # Q5 — Total revenue (single SUM)                                     
+
     {
         "id": 5,
         "question": "What is the total revenue?",
@@ -90,9 +60,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q6 — Revenue grouped by doctor                                      #
-    # ------------------------------------------------------------------ #
+    # Q6 — Revenue grouped by doctor                                      
     {
         "id": 6,
         "question": "Show revenue by doctor",
@@ -100,9 +68,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q7 — Cancelled appointments last quarter                            #
-    # ------------------------------------------------------------------ #
+    # Q7 — Cancelled appointments last quarter                            
     {
         "id": 7,
         "question": "How many cancelled appointments last quarter?",
@@ -112,9 +78,8 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q8 — Top 5 patients by spending                                     #
-    # ------------------------------------------------------------------ #
+    # Q8 — Top 5 patients by spending                                     
+
     {
         "id": 8,
         "question": "Top 5 patients by spending",
@@ -124,9 +89,7 @@ TEST_CASES = [
         "exact_rows": 5,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q9 — Average treatment cost by specialization                       #
-    # ------------------------------------------------------------------ #
+    # Q9 — Average treatment cost by specialization                       
     {
         "id": 9,
         "question": "Average treatment cost by specialization",
@@ -135,11 +98,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q10 — Monthly appointment count past 6 months                       #
-    # max_rows=6 intentionally strict → natural FAIL                      #
-    # The DB has 8 months of data so this returns 8 rows                  #
-    # ------------------------------------------------------------------ #
+    # Q10 — Monthly appointment count past 6 months                       
     {
         "id": 10,
         "question": "Show monthly appointment count for the past 6 months",
@@ -148,9 +107,7 @@ TEST_CASES = [
         "max_rows": 6,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q11 — City with most patients                                       #
-    # ------------------------------------------------------------------ #
+    # Q11 — City with most patients                                       
     {
         "id": 11,
         "question": "Which city has the most patients?",
@@ -160,9 +117,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q12 — Patients visiting more than 3 times                           #
-    # ------------------------------------------------------------------ #
+    # Q12 — Patients visiting more than 3 times                           
     {
         "id": 12,
         "question": "List patients who visited more than 3 times",
@@ -170,9 +125,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q13 — Unpaid invoices                                               #
-    # ------------------------------------------------------------------ #
+    # Q13 — Unpaid invoices                                               
     {
         "id": 13,
         "question": "Show unpaid invoices",
@@ -180,10 +133,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q14 — No-show percentage                                            #
-    # Note: removed "100.0" — LLM may format it slightly differently      #
-    # ------------------------------------------------------------------ #
+    # Q14 — No-show percentage                                            
     {
         "id": 14,
         "question": "What percentage of appointments are no-shows?",
@@ -193,9 +143,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
     # Q15 — Busiest day of week for appointments                          #
-    # ------------------------------------------------------------------ #
     {
         "id": 15,
         "question": "Show the busiest day of the week for appointments",
@@ -203,9 +151,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
-    # Q16 — Revenue trend by month                                        #
-    # ------------------------------------------------------------------ #
+    # Q16 — Revenue trend by month                                        
     {
         "id": 16,
         "question": "Revenue trend by month",
@@ -214,9 +160,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
     # Q17 — Average appointment duration by doctor                        #
-    # ------------------------------------------------------------------ #
     {
         "id": 17,
         "question": "Average appointment duration by doctor",
@@ -225,9 +169,7 @@ TEST_CASES = [
         "min_rows": 0,
     },
 
-    # ------------------------------------------------------------------ #
     # Q18 — Patients with overdue invoices                                #
-    # ------------------------------------------------------------------ #
     {
         "id": 18,
         "question": "List patients with overdue invoices",
@@ -235,9 +177,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
     # Q19 — Revenue compared between departments                          #
-    # ------------------------------------------------------------------ #
     {
         "id": 19,
         "question": "Compare revenue between departments",
@@ -245,9 +185,7 @@ TEST_CASES = [
         "min_rows": 1,
     },
 
-    # ------------------------------------------------------------------ #
     # Q20 — Patient registration trend by month                           #
-    # ------------------------------------------------------------------ #
     {
         "id": 20,
         "question": "Show patient registration trend by month",
@@ -257,10 +195,7 @@ TEST_CASES = [
     },
 ]
 
-
-# ---------------------------------------------------------------------------
 # SQL validation
-# ---------------------------------------------------------------------------
 
 def check_sql(sql: str, test: dict) -> tuple[bool, list[str]]:
     """
@@ -291,10 +226,7 @@ def check_sql(sql: str, test: dict) -> tuple[bool, list[str]]:
 
     return len(issues) == 0, issues
 
-
-# ---------------------------------------------------------------------------
 # Single test runner
-# ---------------------------------------------------------------------------
 
 def run_test(test: dict) -> dict:
     """Send question to /chat and validate the response."""
@@ -391,9 +323,7 @@ def run_test(test: dict) -> dict:
     return result
 
 
-# ---------------------------------------------------------------------------
 # Markdown report
-# ---------------------------------------------------------------------------
 
 def generate_results_md(results: list[dict], score: int, total: int) -> str:
     failed = [r for r in results if r["status"] == "FAIL"]
@@ -478,10 +408,7 @@ def generate_results_md(results: list[dict], score: int, total: int) -> str:
 
     return "\n".join(lines)
 
-
-# ---------------------------------------------------------------------------
 # Main
-# ---------------------------------------------------------------------------
 
 def main():
     print("Testing 20 Questions - NL2SQL Clinic Chatbot")
@@ -532,7 +459,7 @@ def main():
     print(f"Success Rate: {rate:.1f}%")
     print("=" * 72)
 
-    # Save JSON — clean results only (no raw API response objects)
+    # Save JSON 
     clean_results = [
         {
             "id":        r["id"],
