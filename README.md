@@ -171,8 +171,6 @@ Input Validation (length, not empty)
 Vanna 2.0 Agent (vanna_setup.py)
   - Grok API(`llama-3.3-70b-versatile`)
   - RunSqlTool → SqliteRunner → clinic.db
-  - VisualizeDataTool (Plotly charts)
-  - DemoAgentMemory (learns over time)
         |
         v
 SQL Validation (SELECT only, no dangerous keywords)
@@ -186,11 +184,11 @@ Parse response → JSON returned to user
 ## Database Schema
 
 The clinic database has 5 tables:
-- **patients** — 400 patients across 10 cities
-- **doctors** — 30 doctors across 5 specializations
-- **appointments** — 1000 appointments over the past 12 months
-- **treatments** — 625 treatments linked to completed appointments
-- **invoices** — 600 invoices with mixed payment statuses
+- **patients** — 200 patients across 10 cities
+- **doctors** — 15 doctors across 5 specializations
+- **appointments** — 500 appointments over the past 12 months
+- **treatments** — 350 treatments linked to completed appointments
+- **invoices** — 300 invoices with mixed payment statuses
 
 ---
 
