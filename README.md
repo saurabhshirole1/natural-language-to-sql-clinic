@@ -169,7 +169,7 @@ Input Validation (length, not empty)
         |
         v
 Vanna 2.0 Agent (vanna_setup.py)
-  - GeminiLlmService (Gemini 2.5 Flash)
+  - Grok API(`llama-3.3-70b-versatile`)
   - RunSqlTool → SqliteRunner → clinic.db
   - VisualizeDataTool (Plotly charts)
   - DemoAgentMemory (learns over time)
